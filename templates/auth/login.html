@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Moment</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="/static/login/css/main.css" />
+
+	</head>
+	<body>
+
+		<!-- Header -->
+			<header id="header">
+				<h1>Spinach2do</h1>
+				<p>A simple and efficient communication platform</p>
+			</header>
+
+		<!-- Signup Form -->
+			<form id="signup-form" method="post">
+                {{ login_obj.username }}
+                {{ login_obj.password }}
+				<input type="submit" value="登 陆" />
+			</form>
+
+
+
+		<!-- Scripts -->
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+{#			<script src="/static/assets/js/jquery.min.js"></script>#}
+			<script src="/static/login/js/main.js"></script>
+
+	</body>
+</html>

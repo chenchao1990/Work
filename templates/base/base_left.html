@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Spinach2do</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/static/bootstrap/css/dashboard.css" rel="stylesheet">
+		<link href="/static/assets/css/main.css" rel="stylesheet" >
+
+        <style>
+            .login-user{ !important;
+                width: 75%;
+                padding-left: 38%;
+                margin-bottom: 7%;
+                font-size: larger;
+                font-weight: bold;
+            }
+        </style>
+        {% block css %}{% endblock %}
+	</head>
+	<body>
+
+		<!-- Content -->
+			<div id="content" style="padding: 3em 5em 8em 2em; margin-left: 18em;">
+                {% block content %}{% endblock %}
+			</div>
+
+		<!-- Sidebar -->
+			<div id="sidebar" style="width: 16em;padding: 1em 1.35em 1em 1.15em;">
+                <ul class="nav login-user">
+                    <span>{{ username }}</span>
+                </ul>
+
+				<!-- Logo -->
+					<h1 id="logo"><a href="/create_work/">CREATE</a></h1>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul>
+							<li  id="work_list" class="current"><a href="/">工单列表</a></li>
+							<li id="to_do_list" class=""><a href="/to_do_work/">待办</a></li>
+							<li id="over_list"><a href="/over_work/">已完成</a></li>
+							<li id="turn_off"><a href="/turn_off/">关闭</a></li>
+						</ul>
+					</nav>
+
+				<!-- Search -->
+					<nav id="nav">
+                        <ul>
+                            <li><a href="/logout/" style="font-size:large;font-weight: bolder;color: white">退出登陆</a></li>
+                        </ul>
+					</nav>
+
+			</div>
+
+		<!-- Scripts -->
+            <script src="/static/bootstrap/js/jquery.min.js"></script>
+{#			<script src="/static/assets/js/jquery.min.js"></script>#}
+			<script src="/static/assets/js/skel.min.js"></script>
+			<script src="/static/assets/js/util.js"></script>
+			<script src="/static/assets/js/main.js"></script>
+            <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+            <script type="text/javascript" src="/static/bootstrap/js/jquery.cookie.js"></script>
+            <script type="text/javascript" src="/static/bootstrap/js/common.js"></script>
+{#            <script type="text/javascript" src="/static/bootstrap/js/layout.js"></script>#}
+            {% block js %}{% endblock %}
+	</body>
+</html>

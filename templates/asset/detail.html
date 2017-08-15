@@ -1,0 +1,337 @@
+{% extends 'base/base_left.html' %}
+{% block css %}
+    <style>
+        .text-left{
+            padding-top: 7px;
+            margin-bottom: 0;
+            text-align: left;
+        }
+        .msg-border{
+            border-top: 1px solid #cfc4c4;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="modal-content" >
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel" style="font-weight: bold; font-size: 20px">工单详情:</h4>
+        </div>
+
+        <div style="padding: 15px;">
+            <form class="form-horizontal" role="form" method="post" action="/create_work/">
+              <div class="form-group" style="display: none">
+                <label class="col-sm-2 control-label" >ID:</label>
+                <div id="work_num" class="col-sm-3 text-left">
+                    {{ work_message.data.work_msg.id }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label ">标题:</label>
+                <div class="col-sm-3 text-left" style="display: inline-block;position: relative;">
+                    {{ work_message.data.work_msg.work_title }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label ">创建人:</label>
+                <div class="col-sm-3 text-left" style="display: inline-block;position: relative;">
+                    {{ work_message.data.work_msg.user }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label ">工单编号:</label>
+                <div class="col-sm-3 text-left" style="display: inline-block;position: relative;">
+
+                    {{ work_message.data.work_msg.work_id }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label ">JIRA:</label>
+                <div class="col-sm-3 text-left" style="display: inline-block;position: relative;">
+                    {{ work_message.data.work_msg.jira_id }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">工单类别:</label>
+                <div class="col-sm-10 text-left">
+                    {{ work_message.data.work_msg.operation_type }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">具体对象:</label>
+                <div class="col-sm-10 text-left">
+                    {{ work_message.data.work_msg.specific }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">优先级:</label>
+                <div class="col-sm-10 text-left">
+                    {{ work_message.data.work_msg.priority_level }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label  class="col-sm-2 control-label">SN:</label>
+                <div class="col-sm-10 text-left">
+                    {{ work_message.data.work_msg.sn }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label  class="col-sm-2 control-label">机柜:</label>
+                <div class="col-sm-10 text-left">
+                    {{ work_message.data.work_msg.cabinet }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">工单状态:</label>
+                <div id="work_state" class="col-sm-10 text-left" style="font-weight: bold">
+                    {{ work_message.data.work_msg.event_state }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">IDC:</label>
+                <div class="col-sm-10 text-left">
+                    {{ work_message.data.work_msg.idc }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">详情:</label>
+                <div class="col-sm-10 text-left">
+                    <pre id="work-message">
+                        {{ work_message.data.work_msg.message }}
+                    </pre>
+                </div>
+              </div>
+
+            </form>
+        </div>
+        <div id="change_state" class="modal-header" style="border-top: 1px solid #e5e5e5;">
+            <div class="btn-group btn-group-justified" >
+              <div class="btn-group btn-group-lg">
+                <button type="button" class="btn btn-danger" style="font-weight: bold" onclick="ChangeRun()">执行工单</button>
+              </div>
+                {% if weight == 'high' %}
+                    <div class="btn-group btn-group-lg">
+                        <button type="button" class="btn btn-info" style="font-weight: bold" onclick="ChangeStop()">关闭工单</button>
+                    </div>
+                {% endif %}
+
+              <div class="btn-group btn-group-lg">
+                <button type="button" class="btn btn-success" style="font-weight: bold" onclick="ChangeOver()">已完成</button>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-content"  id="work-action">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel" style="font-weight: bold; font-size: 20px">工单活动:</h4>
+        </div>
+
+        <div style="padding: 15px;" id="work-follow">
+            <button type="button" class="btn btn-default"  onclick="DetailMsg()">工单跟踪</button>
+        </div>
+
+        <div style="padding: 15px;border-bottom: 1px solid #e5e5e5;">
+            <table class="table table-hover">
+                  <thead>
+                  </thead>
+
+                   <tbody id="msg-list">
+                  </tbody>
+            </table>
+
+        </div>
+
+        <div style="padding: 15px;" id="sub-msg" class="hide">
+{#            <form role="form">#}
+                <textarea class="form-control" id="msg-text" rows="3" style="width: 60%"></textarea>
+                <input class="btn btn-primary" onclick="SubmitMsg(this);" type="submit" style="margin-top: 10px;" value="提交">
+{#            </form>#}
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block js %}
+      <script type="text/javascript">
+        $(function(){
+                $.InitMenu('#asset_list');          /* 控制左侧菜单的闭合 为点击的按钮添加激活的样式 */
+
+                Initialize();
+                StripTab();
+            });
+
+
+        function Initialize(){
+            var work_num_id = $('#work_num').text().trim();
+            $.ajax({
+                url:'/get_work_state/',
+                type:'POST',
+                traditional:true,
+                data:{'work_num': work_num_id},
+                success: function (response) {
+
+                    var callback = $.parseJSON(response);
+                    var state_tag = callback.event_state__event_mark;
+                    var state_str = callback.event_state__event_type;
+                    if(state_tag == 'running'){
+                        $('#work_state').css({'color':'red'}).text(state_str);
+                        $.Show('#work-action');
+                    }
+                    else if(state_tag == 'wait'){
+                        $('#work_state').css({'color':'orange'}).text(state_str);
+                        $.Hide('#work-action');
+                    }
+                    else if(state_tag == 'finish'){$('#work_state').css({'color':'green'}).text(state_str)}
+                    else if(state_tag == 'shutdown'){
+                        $('#work_state').css({'color':'blue'}).text(state_str);
+                        $('#change_state').css({'display':'none'});
+                        $('#sub-msg').remove();
+
+                    }
+                },
+                error:function(){
+                    alert("获取工单状态失败");
+                }
+            })
+        }
+        function StripTab(){
+            var msg_str = $('#work-message').text();
+            msg_str = $.trim(msg_str);
+            $('#work-message').text(msg_str);
+        }
+{#        开始处理工单#}
+        function ChangeRun(){
+            var work_num_id = $('#work_num').text().trim();
+            $.ajax({
+                url:'/change_work_state/',
+                type:'POST',
+                traditional:true,
+                data:{'change_value': 'running', 'work_id':work_num_id},
+                success: function (callback) {
+                    var response = $.parseJSON(callback);
+                    if(response.status == 1){Initialize()}
+                },
+                error:function(){
+                    alert(response.message);
+                }
+            })
+        }
+
+{#        工单以完成#}
+        function ChangeOver(){
+            var work_num_id = $('#work_num').text().trim();
+            $.ajax({
+                url:'/change_work_state/',
+                type:'POST',
+                traditional:true,
+                data:{'change_value': 'finish', 'work_id':work_num_id},
+                success: function (callback) {
+                    var response = $.parseJSON(callback);
+                    if(response.status == 1){Initialize()}
+                },
+                error:function(){
+                    alert("切换工单状态完成失败");
+                }
+            })
+        }
+{#        关闭工单#}
+        function ChangeStop(){
+            var ret = window.confirm("确认关闭工单，将不能进行任何操作?");
+            if(ret){
+                var work_num_id = $('#work_num').text().trim();
+                $.ajax({
+                    url:'/change_work_state/',
+                    type:'POST',
+                    traditional:true,
+                    data:{'change_value': 'shutdown', 'work_id':work_num_id},
+                    success: function (callback) {
+                        var response = $.parseJSON(callback);
+
+                        if(response.status == 1){
+                            Initialize();
+                            $('#sub-msg').addClass('hide');
+                            $('#work-action').remove();
+                        }
+                    },
+                    error:function(){
+                        alert("切换工单状态完成失败");
+                    }
+                })
+            }
+
+        }
+        // 将输入的信息 提交
+        function SubmitMsg(ths){
+            var work_num_id = $('#work_num').text().trim();
+            var work_msg = $('#msg-text').val().trim();
+            $.ajax({
+                url:'/submit_work_msg/',
+                type:'POST',
+                traditional:true,
+                data:{'work_id':work_num_id, 'work_msg':work_msg},
+                success: function (callback) {
+                    var response = $.parseJSON(callback);
+                    if(response.status == 1){DetailMsg()}
+                    $('#msg-text').val('')
+                },
+                error:function(){
+                    alert("提交信息");
+                }
+            })
+        }
+                // 创建用于显示换行的html
+      function CreatePre(attrs,csses,text){
+            var obj= document.createElement('pre');      // 创建一个pre的标签
+            $.each(attrs,function(k,v){                 // 循环 属性的attrs
+                $(obj).attr(k,v);
+            });
+            $.each(csses,function(k,v){                 // 循环 css的csses
+                $(obj).css(k,v);
+            });
+            //为创建的td标签 添加html代码
+            $(obj).html(text);
+            return obj;
+      }
+
+{#    获取工单对话#}
+      function DetailMsg(){
+            var work_num_id = $('#work_num').text().trim();
+            $('#work-follow').addClass('hide');
+
+            $.ajax({
+                url:'/get_work_msg/',
+                type:'POST',
+                traditional:true,
+                data:{'work_id':work_num_id},
+                success: function (callback) {
+                    var response = $.parseJSON(callback);
+                    $('#msg-list').empty();             // 将消息列表清空
+                    var data = response.data;
+                    $.each(data, function (key, value) {
+                        var login_user = value.user_from__name;
+                        var msg = value.message;
+                        var time = value.submit_time;
+                        var tds_list = [];
+                        tds_list.push($.CreateTd({'style':'font-weight: bold;'}, {}, login_user));
+                        tds_list.push(CreatePre({'class':'msg-border'}, {}, msg));
+                        tds_list.push($.CreateTd({}, {}, time));
+
+                        var msg_tr = $.CreateTr({}, {}, tds_list);
+
+                        $('#msg-list').append(msg_tr)
+                    });
+                    var work_mark = response.work_state.event_state__event_mark;
+                    if(work_mark == 'stop'){
+                        $.Hide('#sub-msg');
+                    }else {
+                        $.Show('#sub-msg');
+                    }
+
+                },
+                error:function(){
+                    alert("获取工单对话失败~~~");
+                }
+            })
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends 'base/base_left.html' %}
+{% block css %}
+    <style>
+        .text-left{
+            padding-top: 7px;
+            margin-bottom: 0;
+            text-align: left;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+{#    按钮组#}
+    <form class="bs-example" data-example-id="btn-tags" id="method-title">
+        <input class="btn btn-default" id="report" type="button" value="日常运维报告" onclick="RoutineWork('#report')">
+        <input class="btn btn-default" id="breakdown" type="button" value="故障统计" onclick="Breakdown('#breakdown')">
+        <input class="btn btn-default" type="button" value="Input">
+        <input class="btn btn-default" type="button" value="Input">
+    </form>
+{#    月份#}
+    <div class="btn-group" style="padding: 15px 0;">
+      <button type="button" id="current-month" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" id="month-option">
+        <li id="1"><a>一月</a></li>
+        <li id="2"><a>二月</a></li>
+        <li id="3"><a>三月</a></li>
+        <li id="4"><a>四月</a></li>
+        <li id="5"><a>五月</a></li>
+        <li id="6"><a>六月</a></li>
+        <li id="7"><a>七月</a></li>
+        <li id="8"><a>八月</a></li>
+        <li id="9"><a>九月</a></li>
+        <li id="10"><a>十月</a></li>
+        <li id="11"><a>十一月</a></li>
+        <li id="12"><a>十二月</a></li>
+      </ul>
+    </div>
+    <div class="bs-example" data-example-id="hoverable-table">
+        <table class="table table-hover" style="font-size: 13px;">
+          <thead id="data-title" style="font-weight: bold">
+          </thead>
+
+          <tbody id="data-body">
+          </tbody>
+        </table>
+    </div>
+
+
+{% endblock %}
+
+{% block js %}
+      <script type="text/javascript">
+        $(function(){
+                $.InitMenu('#pengboshi-list');          /* 控制左侧菜单的闭合 为点击的按钮添加激活的样式 */
+                SelectMonth();
+{#                Initialize();#}
+            });
+
+
+        function Initialize(){
+            var work_num_id = $('#work_num').text().trim();
+            $.ajax({
+                url:'/get_work_state/',
+                type:'POST',
+                traditional:true,
+                data:{'work_num': work_num_id},
+                success: function (response) {
+                    var callback = $.parseJSON(response);
+                    var state_tag = callback.event_state__event_mark;
+                    var state_str = callback.event_state__event_type;
+                    if(state_tag == 'running'){$('#work_state').css({'color':'red'}).text(state_str)}
+                    else if(state_tag == 'wait'){$('#work_state').css({'color':'orange'}).text(state_str)}
+                    else if(state_tag == 'over'){$('#work_state').css({'color':'green'}).text(state_str)}
+                    else if(state_tag == 'stop'){
+                        $('#work_state').css({'color':'blue'}).text(state_str);
+                        $('#change_state').css({'display':'none'});
+
+                    }
+                },
+                error:function(){
+                    alert("eeeeeeeor");
+                }
+            })
+        }
+{#        添加被点击的样式#}
+        function AddMethodClass(target){
+                $(target).addClass('current-method').siblings().each(function () {
+                    $(this).removeClass('current-method')
+                })
+        }
+
+{#        将后台的数据添加到页面中#}
+        function AddDataToTable(data){
+            EmptyData();
+            var report_list = ["#", "日期", "值班人员", "巡检次数", "客户委托作业", "SN", "人员进出", "设备进出", "故障申报"];
+            var all_data = [];
+            var ths = [];
+
+{#            创建头部的tr  th#}
+            $.each(report_list, function (index, value) {
+                ths.push(CreateTh({}, {}, value))
+            });
+            $("#data-title").append($.CreateTr({}, {}, ths));
+
+{#            创建数据的tr td#}
+            $.each(data, function (index, value) {
+                var tds = [];
+                var trs = [];
+                tds.push($.CreateTd({}, {}, index));
+                tds.push($.CreateTd({}, {}, value.date));
+                tds.push($.CreateTd({}, {}, value.duty_operator));
+                tds.push($.CreateTd({}, {}, value.check_times));
+                tds.push($.CreateTd({}, {}, value.entrust_work));
+                tds.push($.CreateTd({}, {}, value.SN));
+                tds.push($.CreateTd({}, {}, value.person_in_out));
+                tds.push($.CreateTd({}, {}, value.device_in_out));
+                tds.push($.CreateTd({}, {}, value.breakdown_out_in));
+                $("#data-body").append($.CreateTr({'data-id':value.id}, {}, tds));
+            });
+
+        }
+
+{#        将错误的数据添加到页面中#}
+        function AddErrorToTable(data){
+            EmptyData();
+            $("#data-title").text(data)
+        }
+
+{#        将页面中的表格数据清空#}
+        function EmptyData(){
+            $("#data-title").empty();
+            $("#data-body").empty();
+        }
+
+{#        日常运维报告#}
+        function RoutineWork(method_id, month_num){
+            AddMethodClass(method_id);          // 为点击的按钮添加样式
+            $.ajax({
+                url:'/pengboshi/report/',
+                type:'POST',
+                traditional:true,
+                data:{'month_num': month_num},
+                success: function (data) {
+                    var callback = $.parseJSON(data);
+                    console.log(callback);
+                    if(callback.status){
+                        AddDataToTable(callback.data);           // 将后台传送的数据添加到页面中
+                    }else {
+                        AddErrorToTable(callback.message);
+                    }
+
+                },
+                error:function(){
+                    alert("eeeeeeeor");
+                }
+            })
+        }
+
+{#        故障统计#}
+        function Breakdown(method_id, month_num){
+            AddMethodClass(method_id);          // 为点击的按钮添加样式
+            $.ajax({
+                url:'/pengboshi/report/',
+                type:'POST',
+                traditional:true,
+                data:{'month_num': month_num},
+                success: function (data) {
+                    var callback = $.parseJSON(data);
+                    console.log(callback);
+                    if(callback.status){
+                        AddDataToTable(callback.data);           // 将后台传送的数据添加到页面中
+                    }else {
+                        AddErrorToTable(callback.message);
+                    }
+
+                },
+                error:function(){
+                    alert("eeeeeeeor");
+                }
+            })
+        }
+
+{#        获取当前的方法，为了确认点击的月份#}
+        function GetMethod(){
+            var m = $('#method-title').children(".current-method").first().attr("method-type");
+            console.log("mmmmmmmmmmmmmmmmmmm", m);
+            return m
+        }
+        {#        将所有的月份选项都绑定时间#}
+        function SelectMonth(){
+            var func_list = ['RoutineWork'];
+            $('#month-option').children().bind('click', function () {
+                var method_func = GetMethod();
+                var month_id = $(this).attr('id');
+                var index_num = func_list.indexOf(method_func);
+                console.log("1111111111111111111111", index_num);
+                if (index_num == 0){
+                    console.log("22222222222222222222222222222");
+{#                    method_func(null, month_id);#}
+                    var func_name = eval(method_func);
+                    new func_name(null, month_id)
+                }
+
+
+            })
+        }
+
+                        //text ：一个input标签 为checkbox
+        function CreateTh(attrs,csses,text){
+            var obj= document.createElement('th');      // 创建一个td的标签
+            $.each(attrs,function(k,v){                 // 循环 属性的attrs
+                $(obj).attr(k,v);
+            });
+            $.each(csses,function(k,v){                 // 循环 css的csses
+                $(obj).css(k,v);
+            });
+            //为创建的td标签 添加html代码
+            $(obj).html(text);
+            return obj;
+        }
+
+    </script>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends 'base/base_left.html' %}
+{% block css %}
+    <style>
+        .a-boder{
+            border: 5px solid #CAC9C9;
+        }
+        .foot-span{
+            padding-left: 10px;
+            padding-right: 10px
+        }
+        .head-span{
+            font-weight: bolder;
+            font-size: larger;
+            padding-left: 10px;
+            padding-right: 10px
+        }
+        .status-over{
+            font-weight: bold;
+            color: green;
+        }
+        .status-wait{
+            font-weight: bold;
+            color: yellow;
+        }
+        .status-running{
+            color: red;
+            font-weight: bold;
+        }
+
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="modal-content" >
+        <div class="list-group" id="work-list">
+
+        </div>
+    </div>
+
+    <div class="pagination" id="page">
+
+    </div>
+
+{% endblock %}
+
+
+{% block js %}
+
+    <script type="text/javascript">
+        $(function(){
+                $.InitMenu('#asset_list');          /* 控制左侧菜单的闭合 为点击的按钮添加激活的样式 */
+
+                Initialize('#table-body',1);
+            });
+
+
+        function ChangePage(page){
+            console.log("pppppppppppppppppppppppp", page);
+            Initialize('#table-body',page);
+        }
+
+        function Initialize(tBody,page){
+            $.Show('#shade,#loading');
+{#            var conditions = JSON.stringify(AggregationSearchCondition('#search_conditions'));#}
+            $.ajax({
+                url:'/work_list/',
+                type:'POST',
+                traditional:true,
+                data:{'page':page},
+                success: function (data) {
+                    // 1.将所有的数据都加载到页面
+                    // 2.对thead的样式进行统一修改
+                    // 3.创建分页的html代码
+                    // 4.
+                    console.log("rrrrrrrrrrrrrrrrrrrrrr", callback);
+                    var callback = $.parseJSON(data);               /* 将后台返回的数据 序列化为字典*/
+                    console.log("rrrrrrrrrrrrrrrrrrrrrr", callback);
+{#                    InitGlobalDict(callback);#}
+                    EmbedIntoTable(callback.asset,"#work-list");   // 将所有的数据都添加到id=table-body的tbody标签中
+{#                    $.ResetTableSort('#table-head',"#table-body");#}
+                    CreatePage(callback.page,'#page');
+{#                    $.BindTableSort('#table-head','#table-body');           // 给head绑定添加排序的事件方法#}
+{#                    $.BindDoSingleCheck('#table-body');                         // 为checkbox绑定进出编辑模式函数#}
+{#                    BindSelectConditionItem('.change-search-condition');    // 将搜索条件的类名 传入#}
+{#                    $.Hide('#shade,#loading');                              // 所有初始化操作完成后 遮罩层和加载层添加隐藏的样式#}
+                },
+                error:function(){
+                    $.Hide('#shade,#loading');                              // ajax请求失败  仅仅遮罩层和加载层添加隐藏样式
+                }
+            })
+        }
+
+        function EmbedIntoTable(response,body){
+            if(!response.status){                           // 如果status为False 则 直接弹出message中的数据
+                alert(response.message);
+            }else{
+                $(body).empty();                    //清除tbody标签中的原内容
+                $.each(response.data,function(key,value){       // key：列表中的ID     value：为一个大字典 包含了每条资产需要的18个值
+{#                    console.log(key,value);#}
+                    var head_spans = [];
+                    var foot_span = [];
+                    var head_div = [];
+                    var foot_div = [];
+                    var divs = [];
+                    var work_state_mark = value.event_state__event_mark;          // 获取工单的状态
+{#                   向列表中追加     创建一个td标签包含了一个input       创建一个input的标签#}
+                    head_spans.push(CreateSpan({'class':'head-span'},{},value.idc__name));      // 追加一个span   IDC
+                    head_spans.push(CreateSpan({'class':'head-span'},{},value.operation_type__operation));      // 追加一个span  操作类型
+                    head_spans.push(CreateSpan({'class':'head-span'},{},value.specific__name));      // 追加一个span   工单编号
+                    head_spans.push(CreateSpan({'class':'head-span'},{},  '标题：'+value.work_title));      // 追加一个span   工单编号
+
+
+                    foot_span.push(CreateSpan({'class':'foot-span'}, {}, '优先级：'+value.priority_level__priority));
+                    if(work_state_mark == "wait"){
+                        foot_span.push(CreateSpan({'class':'foot-span', 'style': 'font-weight: bold; color: orange;'}, {}, '状态：'+value.event_state__event_type));
+                    }else if (work_state_mark == "running"){
+                        foot_span.push(CreateSpan({'class':'foot-span', 'style': 'font-weight: bold; color: red;'}, {}, '状态：'+value.event_state__event_type));
+                    }else if (work_state_mark == "finish"){
+                        foot_span.push(CreateSpan({'class':'foot-span', 'style': 'font-weight: bold; color: green;'}, {}, '状态：'+value.event_state__event_type));
+                    }else {
+                        foot_span.push(CreateSpan({'class':'foot-span', 'style': 'font-weight: bold; color: blue;'}, {}, '状态：'+value.event_state__event_type));                    }
+                    foot_span.push(CreateSpan({'class':'foot-span'}, {}, '创建时间：'+value.add_time));
+                    head_div.push($.CreateBigDiv({'class': "msg-header"}, {}, head_spans));
+                    foot_div.push($.CreateBigDiv({'class': "msg-foot"}, {}, foot_span));
+                    divs.push(head_div);
+                    divs.push(foot_div);
+                    var As = CreateAs({'id':value.id,'href':'/work/detail/'+ value.id,'target':'_blank', 'class': 'list-group-item a-boder '},{},divs);
+
+                    $(body).append(As);
+
+                })
+
+            }
+        }
+
+
+        function CreatePage(data,target){           // 创建分页
+            $(target).empty().append(data);
+        }
+
+
+                //text ：一个input标签 为checkbox
+        function CreateSpan(attrs,csses,text){
+            var obj= document.createElement('span');      // 创建一个td的标签
+            $.each(attrs,function(k,v){                 // 循环 属性的attrs
+                $(obj).attr(k,v);
+            });
+            $.each(csses,function(k,v){                 // 循环 css的csses
+                $(obj).css(k,v);
+            });
+            //为创建的td标签 添加html代码
+            $(obj).html(text);
+            return obj;
+        }
+        function CreateAs(attrs,csses,div_list){
+            var obj= document.createElement('a');       // 创建一个A标签
+            $.each(attrs,function(k,v){                 // {href     id     target}
+                $(obj).attr(k,v);                       // 为创建的A标签 添加属性
+            });
+            $.each(csses,function(k,v){
+                $(obj).css(k,v);
+            });
+            $.each(div_list,function(k,v){                   // 循环前面已经装有标签数据的列表 、
+                $(v).appendTo($(obj));                  // 把$()中的元素追加到后面的$(obj)中  将列表中的标签追加到创建的tr中
+            });
+            return obj
+        }
+    </script>
+{% endblock %}
