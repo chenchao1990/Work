@@ -155,9 +155,10 @@
       <script type="text/javascript">
         $(function(){
                 $.InitMenu('#asset_list');          /* 控制左侧菜单的闭合 为点击的按钮添加激活的样式 */
-
+                DetailMsg();
                 Initialize();
                 StripTab();
+
             });
 
 
@@ -194,6 +195,7 @@
                 }
             })
         }
+        // 移除文字中的空格
         function StripTab(){
             var msg_str = $('#work-message').text();
             msg_str = $.trim(msg_str);

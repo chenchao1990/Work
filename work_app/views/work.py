@@ -14,6 +14,16 @@ from work_app import models
 import json
 
 
+def user_weight(request):
+    num = int(request.weight)
+    if num > 100:
+        role = 'high'
+    else:
+        role = 'low'
+
+    return role
+
+
 def make_work_id():
     '''
     生成一个自定义的工单编号
@@ -28,7 +38,9 @@ def create_work(request):
     '''
     创建工单
     '''
+    role = user_weight(request)
     if request.method == "POST":
+
         login_user = request.session.get('auth_user', None)         # 登录用户的ID和姓名
         user_id = json.loads(login_user)['id']
 
@@ -42,7 +54,7 @@ def create_work(request):
         work_manager.create_work(new_data_dict)
 
         return redirect('/')
-    return render(request, 'asset/create_info.html', {'username': request.username})
+    return render(request, 'asset/create_info.html', {'username': request.username, 'weight': role})
 
 
 @login_auth
@@ -65,29 +77,33 @@ def work_list(request):
     '''
     获取所有的工单信息 返回给前端AJax 展示到前端
     '''
-    conditions = request.POST.get('condition', None)
-    page = request.POST.get('page', None)
-    idc_id = request.belong_idc             # 获取IDC的id 如果为0 说明是运维人员或者管理员
-    if not conditions:
-        if idc_id == 0:
-            conditions = '{}'
-        else:
-            d = {'idc__id': [idc_id]}
-            conditions = json.dumps(d)
-    conditions = json.loads(conditions)
-    all_count = work_manager.get_asset_lists_count(conditions)       # 按照搜索条件 去查询匹配到的数据条数
-    page_info = pager.PageInfo(page, all_count.data)                # 根据传入的 页数 和 所有查询都的数据条数 去获取分页的对象
-    ret = dict()
-    ret['asset'] = work_manager.get_work_lists(conditions, page_info.start, page_info.end).__dict__     # 获取工单信息 封装在字典中
-    ret['page'] = page_info.pager()
+    role = user_weight(request)
+    if request.method == "POST":
+        conditions = request.POST.get('condition', None)
+        page = request.POST.get('page', None)
+        idc_id = request.belong_idc             # 获取IDC的id 如果为0 说明是运维人员或者管理员
+        if not conditions:
+            if idc_id == 0:
+                conditions = '{}'
+            else:
+                d = {'idc__id': [idc_id]}
+                conditions = json.dumps(d)
+        conditions = json.loads(conditions)
+        all_count = work_manager.get_asset_lists_count(conditions)       # 按照搜索条件 去查询匹配到的数据条数
+        page_info = pager.PageInfo(page, all_count.data)                # 根据传入的 页数 和 所有查询都的数据条数 去获取分页的对象
+        ret = dict()
+        ret['asset'] = work_manager.get_work_lists(conditions, page_info.start, page_info.end).__dict__     # 获取工单信息 封装在字典中
+        ret['page'] = page_info.pager()
 
-    ret['start'] = page_info.start                                      # 数据开始的位置
-    result = json.dumps(ret)
-    return HttpResponse(result)
+        ret['start'] = page_info.start                                      # 数据开始的位置
+        result = json.dumps(ret)
+        return HttpResponse(result)
+    return render(request, 'asset/home.html', {'username': request.username, 'weight': role})
 
 
 @login_auth
 def work_to_do(request):
+    role = user_weight(request)
     if request.method == "POST":
         page = request.POST.get('page', None)
         idc_id = request.belong_idc
@@ -101,11 +117,31 @@ def work_to_do(request):
         ret['start'] = page_info.start                                      # 数据开始的位置
         result = json.dumps(ret)
         return HttpResponse(result)
-    return render(request, 'asset/to_do.html', {'username': request.username})
+    return render(request, 'asset/to_do.html', {'username': request.username, 'weight': role})
+
+
+@login_auth
+def work_doing(request):            # 获取正在执行的工单
+    role = user_weight(request)
+    if request.method == "POST":
+        page = request.POST.get('page', None)
+        idc_id = request.belong_idc
+
+        all_count = work_manager.get_doing_lists_count(idc_id)       # 按照搜索条件 去查询匹配到的数据条数
+        page_info = pager.PageInfo(page, all_count.data)                # 根据传入的 页数 和 所有查询都的数据条数 去获取分页的对象
+        ret = dict()
+        ret['asset'] = work_manager.get_doing_work_lists(page_info.start, page_info.end, idc_id).__dict__     # 获取工单信息 封装在字典中
+        ret['page'] = page_info.pager()
+
+        ret['start'] = page_info.start                                      # 数据开始的位置
+        result = json.dumps(ret)
+        return HttpResponse(result)
+    return render(request, 'asset/doing_work.html', {'username': request.username, 'weight': role})
 
 
 @login_auth
 def work_shutdown(request):
+    role = user_weight(request)
     # 获取状态为关闭的工单
     if request.method == "POST":
         page = request.POST.get('page', None)
@@ -120,7 +156,7 @@ def work_shutdown(request):
         ret['start'] = page_info.start                                      # 数据开始的位置
         result = json.dumps(ret)
         return HttpResponse(result)
-    return render(request, 'asset/shut_down_work.html', {'username': request.username})
+    return render(request, 'asset/shut_down_work.html', {'username': request.username, 'weight': role})
 
 
 @login_auth
@@ -128,6 +164,7 @@ def over_work(request):
     '''
     获取已完成工单页面
     '''
+    role = user_weight(request)
     if request.method == 'POST':
 
         page = request.POST.get('page', None)
@@ -141,7 +178,7 @@ def over_work(request):
         ret['start'] = page_info.start
         result = json.dumps(ret)
         return HttpResponse(result)
-    return render(request, 'asset/finish_work_list.html', {'username': request.username})
+    return render(request, 'asset/finish_work_list.html', {'username': request.username, 'weight': role})
 
 
 @login_auth
@@ -166,6 +203,7 @@ def work_to_do_list(request):
 @login_auth
 def work_detail(request, nid):
     num = int(request.weight)
+
     if num > 100:
         role = 'high'
     else:

@@ -11,15 +11,19 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
 
-mail_host = "smtp.163.com"       # 邮件服务器
-mail_user = "spinache2do@163.com"
-user_email = "spinache2do@163.com"
-user_pwd = "gomeplus123"
+# mail_host = "smtp.163.com"       # 邮件服务器
+# mail_user = "spinache2do@163.com"
+# user_email = "spinache2do@163.com"
+# user_pwd = "gomeplus123"
+
+mail_host = "smtp.126.com"       # 邮件服务器
+mail_user = "spinache2do@126.com"
+user_email = "spinache2do@126.com"
+user_pwd = "pwd1234"
 
 '''
 # mail_host = "mail.gomeplus.com"       # 邮件服务器
 mail_host = "10.58.45.230"       # 邮件服务器
-
 user_email = "chenchao-ds@gomeplus.com"
 mail_user = "chenchao-ds"
 user_pwd = "pwd@12345"
@@ -55,7 +59,7 @@ def send_mail_by_thread(data_dict, recive_email):
     # receive_list = ['465234371@qq.com']                                   # 接受者
 
     msg_obj['To'] = ";".join(receive_list)
-    msg_obj['from'] = 'spinache2do@163.com'                         # 发送者
+    msg_obj['from'] = mail_user                         # 发送者
     msg_obj['subject'] = '%s' % data_dict.pop('work_title')         # 主题
 
     pool = Pool(1)

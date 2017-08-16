@@ -124,9 +124,9 @@
         //将左侧菜单栏展开或收缩
         // 向正在点击的标签添加激活样式 然后将其他的标签删除激活样式
         'InitMenu':function(target){
-            $(target).addClass('selected').parent().parent().addClass('in').parent().siblings().each(function(){
-                $(this).find('.panel-collapse').removeClass('in');
-            });
+            $(target).addClass('current').siblings().each(function(){
+                $(this).removeClass('current');
+            })
         },
         //创建一个div标签
         'CreateDiv':function(attrs,csses,text){

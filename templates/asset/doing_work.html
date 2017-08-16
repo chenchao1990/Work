@@ -33,7 +33,7 @@
 
 {% block content %}
     <div class="modal-content" >
-        <div class="list-group" id="finish-list">
+        <div class="list-group" id="work-list">
 
         </div>
     </div>
@@ -41,13 +41,15 @@
     <div class="pagination" id="page">
 
     </div>
+
 {% endblock %}
+
 
 {% block js %}
 
     <script type="text/javascript">
         $(function(){
-                $.InitMenu('#over_list');          /* 控制左侧菜单的闭合 为点击的按钮添加激活的样式 */
+                $.InitMenu('#doing-list');          /* 控制左侧菜单的闭合 为点击的按钮添加激活的样式 */
 
                 Initialize('#table-body',1);
             });
@@ -60,27 +62,29 @@
 
         function Initialize(tBody,page){
             $.Show('#shade,#loading');
+{#            var conditions = JSON.stringify(AggregationSearchCondition('#search_conditions'));#}
             $.ajax({
-                url:'/get_over_work/',
+                url:'/work_doing_list/',
                 type:'POST',
                 traditional:true,
                 data:{'page':page},
-{#                data:{'finish_work':{'event_state__id': ['3']}},#}
                 success: function (data) {
-                    console.log("888888888888888888888888");
+
                     var callback = $.parseJSON(data);               /* 将后台返回的数据 序列化为字典*/
                     console.log("rrrrrrrrrrrrrrrrrrrrrr", callback);
-                    EmbedIntoTable(callback.asset,"#finish-list");   // 将所有的数据都添加到id=table-body的tbody标签中
+{#                    InitGlobalDict(callback);#}
+                    EmbedIntoTable(callback.asset,"#work-list");   // 将所有的数据都添加到id=table-body的tbody标签中
+{#                    $.ResetTableSort('#table-head',"#table-body");#}
                     CreatePage(callback.page,'#page');
+{#                    $.BindTableSort('#table-head','#table-body');           // 给head绑定添加排序的事件方法#}
+{#                    $.BindDoSingleCheck('#table-body');                         // 为checkbox绑定进出编辑模式函数#}
+{#                    BindSelectConditionItem('.change-search-condition');    // 将搜索条件的类名 传入#}
+{#                    $.Hide('#shade,#loading');                              // 所有初始化操作完成后 遮罩层和加载层添加隐藏的样式#}
                 },
                 error:function(){
                     $.Hide('#shade,#loading');                              // ajax请求失败  仅仅遮罩层和加载层添加隐藏样式
                 }
             })
-        }
-
-        function CreatePage(data,target){           // 创建分页
-            $(target).empty().append(data);
         }
 
         function EmbedIntoTable(response,body){
@@ -101,7 +105,6 @@
                     head_spans.push(CreateSpan({'class':'head-span'},{},value.operation_type__operation));      // 追加一个span  操作类型
                     head_spans.push(CreateSpan({'class':'head-span'},{},value.specific__name));      // 追加一个span   工单编号
                     head_spans.push(CreateSpan({'class':'head-span'},{},  '标题：'+value.work_title));      // 追加一个span   工单编号
-
 
                     foot_span.push(CreateSpan({'class':'foot-span'}, {}, '优先级：'+value.priority_level__priority));
                     if(work_state_mark == "wait"){
@@ -125,6 +128,13 @@
 
             }
         }
+
+
+        function CreatePage(data,target){           // 创建分页
+            $(target).empty().append(data);
+        }
+
+
                 //text ：一个input标签 为checkbox
         function CreateSpan(attrs,csses,text){
             var obj= document.createElement('span');      // 创建一个td的标签

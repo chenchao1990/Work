@@ -32,7 +32,7 @@ def get_work_list(start, end, condition, values):
         ret = models.WorkMsg.objects.filter(condition).order_by('-id').values(*values)[start:end]
         return ret
     except Exception, e:
-        print "gggget__________list", e
+        print "get__all__work_err", e
         return str(e)
 
 
@@ -46,7 +46,21 @@ def get_to_do_work_list(start, end, values, idc_id):
         ret = models.WorkMsg.objects.filter(**d).order_by('-id').values(*values)[start:end]
         return ret
     except Exception, e:
-        print "gggget__________list", e
+        print "get_wait__work_err", e
+        return str(e)
+
+
+def get_doing_work_list(start, end, values, idc_id):
+    try:
+        if idc_id_is0(idc_id):
+            d = {'event_state__event_mark': 'running'}
+        else:
+            d = {'event_state__event_mark': 'running', 'idc__id': idc_id}
+
+        ret = models.WorkMsg.objects.filter(**d).order_by('-id').values(*values)[start:end]
+        return ret
+    except Exception, e:
+        print "get__doing__work_err: ", e
         return str(e)
 
 
@@ -60,7 +74,7 @@ def get_over_work_list(start, end, values, idc_id):
         ret = models.WorkMsg.objects.filter(**d).order_by('-id').values(*values)[start:end]
         return ret
     except Exception, e:
-        print "gggget__________list", e
+        print "get__over__work_err", e
         return str(e)
 
 
@@ -74,7 +88,7 @@ def get_shutdown_work_list(start, end, values, idc_id):
         ret = models.WorkMsg.objects.filter(**d).order_by('-id').values(*values)[start:end]
         return ret
     except Exception, e:
-        print "gggget__________list", e
+        print "get__shutdown__work_err", e
         return str(e)
 
 
@@ -90,6 +104,16 @@ def get_to_do_work_lists_count(idc__id):
         d = {'event_state__event_mark': 'wait'}
     else:
         d = {'event_state__event_mark': 'wait', 'idc__id': idc__id}
+    ret = models.WorkMsg.objects.filter(**d).count()
+    return ret
+
+
+def get_doing_work_lists_count(idc__id):
+    # 获取执行中工单个数
+    if idc_id_is0(idc__id):
+        d = {'event_state__event_mark': 'running'}
+    else:
+        d = {'event_state__event_mark': 'running', 'idc__id': idc__id}
     ret = models.WorkMsg.objects.filter(**d).count()
     return ret
 

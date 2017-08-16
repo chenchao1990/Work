@@ -112,6 +112,21 @@ def get_to_do_lists_count(idc_id):
     return response
 
 
+def get_doing_lists_count(idc_id):
+    '''
+    获取执行中的工单个数
+    '''
+    response = BaseResponse()
+    try:
+        result = work_handle.get_doing_work_lists_count(idc_id)         # j将搜索条件Q 传入其中 取出搜索到的数据的条数
+        response.data = result
+        response.status = True
+    except Exception, e:
+        response.message = str(e)
+
+    return response
+
+
 def get_shutdown_lists_count(idc_id):
     '''
     获取关闭的工单个数
@@ -184,6 +199,27 @@ def get_to_do_work_lists(page_start, page_stop, idc_id):
                   'event_state__event_mark']      # 在这里定义好查询表时 需要筛选的字段
 
         result = work_handle.get_to_do_work_list(page_start, page_stop, values, idc_id)    # 搜索工单信息
+        result = list(result)
+        response.data = result                  # 封装到对象中
+        response.status = True
+
+    except Exception, e:
+        response.message = str(e)
+
+    return response
+
+
+def get_doing_work_lists(page_start, page_stop, idc_id):
+    '''
+    获取已执行的所有工单
+    '''
+    response = BaseResponse()
+    try:
+        values = ['id', 'work_id', 'work_title', 'operation_type__operation', 'specific__name',  'priority_level__priority',
+                  'event_state__event_type', 'user__name', 'idc__name', 'add_time', 'over_time',
+                  'event_state__event_mark']      # 在这里定义好查询表时 需要筛选的字段
+
+        result = work_handle.get_doing_work_list(page_start, page_stop, values, idc_id)    # 搜索工单信息
         result = list(result)
         response.data = result                  # 封装到对象中
         response.status = True

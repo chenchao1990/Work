@@ -20,7 +20,8 @@ from work_app.views import work
 from work_app.views import account
 
 urlpatterns = [
-    url(r'^$', home.index),
+    url(r'all_work/$', work.work_list),
+    url(r'^$', work.work_to_do),
     url(r'login/$', account.login),
     url(r'logout/$', account.logout),
 
@@ -39,6 +40,8 @@ urlpatterns = [
     url(r'get_over_work/$', work.get_over_work),
     url(r'get_work_msg/$', work.get_work_msg),
     url(r'submit_work_msg/$', work.submit_work_msg),
+
+    url(r'work_doing_list/$', work.work_doing),
 
 
 ]

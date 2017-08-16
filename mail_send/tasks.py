@@ -11,11 +11,20 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
 
+# mail_host = "smtp.163.com"       # 邮件服务器
+# mail_user = "13716875340@163.com"
+# user_email = "13716875340@163.com"
+# user_pwd = "pwd1234"
 
-mail_host = "smtp.163.com"       # 邮件服务器
-mail_user = "spinache2do@163.com"
-user_email = "spinache2do@163.com"
-user_pwd = "gomeplus123"
+mail_host = "smtp.126.com"       # 邮件服务器
+mail_user = "spinache2do@126.com"
+user_email = "spinache2do@126.com"
+user_pwd = "pwd1234"
+
+# mail_host = "smtp.163.com"       # 邮件服务器
+# mail_user = "spinache2do@163.com"
+# user_email = "spinache2do@163.com"
+# user_pwd = "PWD1234"
 
 '''
 # mail_host = "mail.gomeplus.com"       # 邮件服务器
@@ -54,11 +63,11 @@ def send_mail(title, email_msg, recive_email):
     #     email_msg += msg_
     text_msg = MIMEText(email_msg, _subtype='plain', _charset='utf-8')
     msg_obj.attach(text_msg)
-    # receive_list = [recive_email, "SA@gomeplus.com"]                        # 接受者
-    receive_list = ['465234371@qq.com']                                   # 接受者
+    # receive_list = [recive_email, "SA@gomeplus.com"]          # 接受者
+    receive_list = ['465234371@qq.com', "chenchao-ds@gomeplus.com"]          # 接受者
 
     msg_obj['To'] = ";".join(receive_list)
-    msg_obj['from'] = 'spinache2do@163.com'                         # 发送者
+    msg_obj['from'] = user_email                        # 发送者
     msg_obj['subject'] = '%s' % title         # 主题
 
     send_email_to_idc(msg_obj['from'], receive_list, msg_obj)
