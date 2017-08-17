@@ -50,9 +50,7 @@ def create_work(post_data):
             idc_id = post_data['idc_id']            # 获取idc的id 来获取邮箱地址
             idc_email = work_handle.get_idc_email(idc_id)
             idc_email = dict(idc_email).get('email')
-            print "-------=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-==-==-"
             work_handle.create_new_work(post_data)      # 将工单字典传入写库方法
-            print "=================create over "
             response.status = True
 
             if response.status:
