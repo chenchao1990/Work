@@ -20,7 +20,7 @@ admin.site.register(models.EventState, EventState)
 
 
 class WorkMsg(admin.ModelAdmin):
-    list_display = ("work_id", "operation_type", 'specific', "priority_level", "user", "add_time")
+    list_display = ("work_id", "operation_type", 'specific', "priority_level", "mail_re", "user", "add_time")
 admin.site.register(models.WorkMsg, WorkMsg)
 
 

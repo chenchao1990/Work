@@ -6,6 +6,7 @@ from django.db.models import Q
 from backend.response.base_response import BaseResponse
 from backend.response.base_response import CreateWorkResponse
 from mail_send.tasks import send_mail
+from mail_send.monitor_tasks import get_task_re
 from django.db import transaction
 from work_app.model_handles import work_handle
 from Work import settings
@@ -50,7 +51,7 @@ def create_work(post_data):
             idc_id = post_data['idc_id']            # 获取idc的id 来获取邮箱地址
             idc_email = work_handle.get_idc_email(idc_id)
             idc_email = dict(idc_email).get('email')
-            work_handle.create_new_work(post_data)      # 将工单字典传入写库方法
+            work_obj = work_handle.create_new_work(post_data)      # 将工单字典传入写库方法
             response.status = True
 
             if response.status:
@@ -61,9 +62,13 @@ def create_work(post_data):
                     msg_ = key + ":" + str(value) + "\n"
                     email_msg += msg_
                 title = order_dict.pop('work_title')
-                # send_mail_by_thread(order_dict, idc_email)
-                re = send_mail.delay(title, email_msg, idc_email)
-                re.ready()
+
+                task_obj = send_mail.apply_async(args=[title, email_msg, idc_email])    # 调用celery 执行任务
+                task_key = "celery-task-meta-%s" % task_obj.id
+                work_handle.save_redis_key(work_obj.id, task_key)            # 将数据库的id和 redis中任务的key存入表中
+                print "task_obj.id", task_obj.id, task_key
+                re = get_task_re.apply_async(args=[str(task_key)], countdown=5)
+                print "idddddddddddddddddddddddddddddddddd",  re
     except Exception, e:
         print "mail_send mail  error ::::::::", e
         response.message = str(e)
@@ -166,7 +171,7 @@ def get_work_lists(conditions, page_start, page_stop):
     try:
         values = ['id', 'work_id', 'work_title', 'operation_type__operation', 'specific__name',  'priority_level__priority',
                   'event_state__event_type', 'user__name', 'idc__name', 'add_time', 'over_time',
-                  'event_state__event_mark']      # 在这里定义好查询表时 需要筛选的字段
+                  'event_state__event_mark', 'mail_re']      # 在这里定义好查询表时 需要筛选的字段
         con = Q()
         for k, v in conditions.items():                     # 循环搜索字典中的数据
             temp = Q()                                      # 创建一个综合搜索的对象
@@ -194,7 +199,7 @@ def get_to_do_work_lists(page_start, page_stop, idc_id):
     try:
         values = ['id', 'work_id', 'work_title', 'operation_type__operation', 'specific__name',  'priority_level__priority',
                   'event_state__event_type', 'user__name', 'idc__name', 'add_time', 'over_time',
-                  'event_state__event_mark']      # 在这里定义好查询表时 需要筛选的字段
+                  'event_state__event_mark', 'mail_re']      # 在这里定义好查询表时 需要筛选的字段
 
         result = work_handle.get_to_do_work_list(page_start, page_stop, values, idc_id)    # 搜索工单信息
         result = list(result)
@@ -215,7 +220,7 @@ def get_doing_work_lists(page_start, page_stop, idc_id):
     try:
         values = ['id', 'work_id', 'work_title', 'operation_type__operation', 'specific__name',  'priority_level__priority',
                   'event_state__event_type', 'user__name', 'idc__name', 'add_time', 'over_time',
-                  'event_state__event_mark']      # 在这里定义好查询表时 需要筛选的字段
+                  'event_state__event_mark', 'mail_re']      # 在这里定义好查询表时 需要筛选的字段
 
         result = work_handle.get_doing_work_list(page_start, page_stop, values, idc_id)    # 搜索工单信息
         result = list(result)
@@ -236,7 +241,7 @@ def get_shutdown_work_lists(page_start, page_stop, idc_id):
     try:
         values = ['id', 'work_id', 'work_title', 'operation_type__operation', 'specific__name',  'priority_level__priority',
                   'event_state__event_type', 'user__name', 'idc__name', 'add_time', 'over_time',
-                  'event_state__event_mark']      # 在这里定义好查询表时 需要筛选的字段
+                  'event_state__event_mark', 'mail_re']      # 在这里定义好查询表时 需要筛选的字段
 
         result = work_handle.get_shutdown_work_list(page_start, page_stop, values, idc_id)    # 搜索工单信息
         result = list(result)
@@ -257,7 +262,7 @@ def get_over_work_lists(page_start, page_stop, idc_id):
     try:
         values = ['id', 'work_id', 'work_title', 'operation_type__operation', 'specific__name',  'priority_level__priority',
                   'event_state__event_type', 'user__name', 'idc__name', 'add_time', 'over_time',
-                  'event_state__event_mark']      # 在这里定义好查询表时 需要筛选的字段
+                  'event_state__event_mark', 'mail_re']      # 在这里定义好查询表时 需要筛选的字段
         result = work_handle.get_over_work_list(page_start, page_stop, values, idc_id)    # 搜索工单信息
         result = list(result)
         response.data = result                  # 封装到对象中

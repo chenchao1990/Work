@@ -10,7 +10,6 @@
         }
         .head-span {
             font-weight: bolder;
-            font-size: larger;
             padding-left: 10px;
             padding-right: 10px
         }
@@ -100,11 +99,21 @@
                     var foot_div = [];
                     var divs = [];
                     var work_state_mark = value.event_state__event_mark;          // 获取工单的状态
+
 {#                   向列表中追加     创建一个td标签包含了一个input       创建一个input的标签#}
                     head_spans.push(CreateSpan({'class':'head-span'},{},value.idc__name));      // 追加一个span   IDC
                     head_spans.push(CreateSpan({'class':'head-span'},{},value.operation_type__operation));      // 追加一个span  操作类型
                     head_spans.push(CreateSpan({'class':'head-span'},{},value.specific__name));      // 追加一个span   工单编号
                     head_spans.push(CreateSpan({'class':'head-span'},{},  '标题：'+value.work_title));      // 追加一个span   工单编号
+                    var maile_re = value.mail_re;
+                    if (maile_re == "success"){
+                        head_spans.push(CreateSpan({'class':'head-span', 'style':'float: right; color: green;'},{},  '邮件：'+value.mail_re));      // 追加一个span   工单编号
+
+                    }else if(maile_re == "failed"){
+                        head_spans.push(CreateSpan({'class':'head-span', 'style':'float: right; color: red;'},{},  '邮件：'+value.mail_re));
+                    }else {
+                        head_spans.push(CreateSpan({'class':'head-span', 'style':'float: right;'},{},  '邮件：'+ '未知'));
+                    }
 
 
                     foot_span.push(CreateSpan({'class':'foot-span'}, {}, '优先级：'+value.priority_level__priority));

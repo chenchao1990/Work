@@ -21,15 +21,15 @@ import smtplib
 # user_email = "spinache2do@126.com"
 # user_pwd = "pwd1234"
 
-# mail_host = "smtp.163.com"       # 邮件服务器
-# mail_user = "spinache2do@163.com"
-# user_email = "spinache2do@163.com"
-# user_pwd = "PWD1234"
+mail_host = "smtp.163.com"       # 邮件服务器
+mail_user = "spinache2do@163.com"
+user_email = "spinache2do@163.com"
+user_pwd = "PWD1234"
 
-mail_host = "mail.gomeplus.com"       # 邮件服务器
-user_email = "chenchao-ds@gomeplus.com"
-mail_user = "chenchao-ds"
-user_pwd = "pwd@12345"
+# mail_host = "mail.gomeplus.com"       # 邮件服务器
+# user_email = "chenchao-ds@gomeplus.com"
+# mail_user = "chenchao-ds"
+# user_pwd = "pwd@12345"
 '''
 # mail_host = "mail.gomeplus.com"       # 邮件服务器
 mail_host = "10.58.45.230"       # 邮件服务器
@@ -51,9 +51,11 @@ def send_email_to_idc(from_user, receive_list, msg_obj):
         server.quit()
         file_obj.write("%s mail send successful \n" % mail_user)
         print 'mail_send successful!!!'
+        return "success"
     except Exception, e:
         file_obj.write("%s mail ERROR: %s \n" % (mail_user, str(e)))
         print str(e)
+        return "failed"
     finally:
         file_obj.close()
 
@@ -65,12 +67,14 @@ def send_mail(title, email_msg, recive_email):
 
     text_msg = MIMEText(email_msg, _subtype='plain', _charset='utf-8')
     msg_obj.attach(text_msg)
-    # receive_list = [recive_email, "SA@gomeplus.com"]          # 接受者
-    receive_list = ['465234371@qq.com', "chenchao-ds@gomeplus.com", "SA@gomeplus.com"]          # 接受者
+    receive_list = [recive_email, "SA@gomeplus.com"]          # 接受者
+    # receive_list = ['465234371@qq.com', "chenchao-ds@gomeplus.com"]          # 接受者
 
     msg_obj['To'] = ";".join(receive_list)
     msg_obj['from'] = user_email                        # 发送者
     msg_obj['subject'] = '%s' % title         # 主题
-    send_email_to_idc(msg_obj['from'], receive_list, msg_obj)
+    ret = send_email_to_idc(msg_obj['from'], receive_list, msg_obj)
+    return ret
+
 
 

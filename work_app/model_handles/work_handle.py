@@ -232,6 +232,24 @@ def get_idc():
     return ret
 
 
+def save_redis_key(work_id, work_key):
+    '''
+    调用celery 返回的work id, 为redis中 的一个key
+    '''
+    work_obj = models.WorkMsg.objects.filter(id=work_id).first()
+    work_obj.redis_key = work_key
+    work_obj.save()
+
+
+def update_mail_result(work_key, mail_state):
+    '''
+    发送邮件的结果
+    '''
+    work_obj = models.WorkMsg.objects.filter(redis_key=work_key).first()
+    work_obj.mail_re = mail_state
+    work_obj.save()
+
+
 def change_state_by_obj(state_str, work_id):
     state_obj = models.EventState.objects.filter(event_mark=state_str).first()
     msg_obj = models.WorkMsg.objects.filter(id=work_id).first()

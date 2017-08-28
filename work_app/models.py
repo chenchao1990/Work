@@ -138,6 +138,8 @@ class WorkMsg(models.Model):
     event_state = models.ForeignKey('EventState', null=True, blank=True)                    # 工单状态
     message = models.TextField(max_length=1200, blank=True, null=True)                      # 工单信息
     idc = models.ForeignKey('IDC')                                                          # IDC
+    mail_re = models.CharField(max_length=10, blank=True, null=True)                        # 发邮件结果
+    redis_key = models.CharField(max_length=60, blank=True, null=True)                      # redis的key
     add_time = models.CharField(max_length=120, blank=True, null=True)                      # 申请时间
     over_time = models.CharField(max_length=120, blank=True, null=True)                     # 完成时间
     start_time = models.CharField(max_length=32, blank=True, null=True)                     # 开始时间戳
